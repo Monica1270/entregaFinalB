@@ -1,0 +1,26 @@
+vieo explicativo https://www.youtube.com/watch?v=1MkXDf4JD9U
+
+
+1️⃣ se crea una carpeta con el nombre del proyecto en 
+en usuarios, etc
+2️⃣ En la terminal de la compu hago pnpm init -y, me crea el package.json
+Donde me hace preguntas y debo contestarlas.
+Tengo que agregar en forma manual type:model
+3️⃣Voy a code busco la carpeta y lo que veo es el package, solamente.
+--Creo el index.json
+3.1-- Aqui creo el puerto  const express = require('express');
+      const app = express();
+      const PORT = 8080
+server.listen(PORT, () => {
+    console.log(`Servidor express escuchando en HTTP://localhost:${PORT}`);
+});
+Y en frontend me aparece connot get/ esto significa que esta bien vinculado el puerto
+4️⃣Cree el archivo server.js para no cargar todo en el index.función principal para iniciar el servidor y la conexión a la base de datos
+5️⃣ Creo el archivo api.js para luego vincularlo con routes productos y import errorHandler from './middlewares/errorHandler.js';
+6️⃣Trabajo en routs productsRouts.js. creamos un producto con get,lo eleiminamos etc
+7️⃣Creamos la carpeta controllers 
+7.1 creamos el archivo products.controller para vincular el codigo de la carpeta
+router  router.get('/', getProducts)
+8️⃣Crear la carpeta de models 
+cual es primer modelo que debemos crear es el  de product.js
+9️⃣Voy a a la carpeta controllers, al archivo products.controllers 
