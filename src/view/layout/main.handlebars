@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .product-card {
+            transition: transform 0.2s;
+        }
+        .product-card:hover {
+            transform: scale(1.02);
+        }
+        /* Garantizamos que la imagen flotante de WhatsApp tenga un tamaño adecuado */
+        .logowhatsapp {
+            width: 60px !important;
+            height: 60px !important;
+            position: fixed !important;
+            bottom: 20px !important;
+            right: 20px !important;
+            z-index: 1000 !important;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body class="bg-light"> 
+
+  <!-- 🟢 Llamada al parcial del Header (Navbar) -->
+  {{> header}}
+
+  <!-- Contenedor Principal -->
+  <main class="container my-4">
+      {{{body}}} 
+  </main>
+
+  <!-- Botón Flotante de WhatsApp -->
+  <a href="https://api.whatsapp.com/send?phone=+5491138245735" target="_blank">
+      <img class="logowhatsapp" src="/whatsapp.png" alt="WhatsApp" onerror="this.style.display='none'">
+  </a>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Socket.io Cliente -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Cuando los productos cambian en tiempo real, recargamos la vista
+    socket.on('products-changed', () => {
+      console.log('Sincronizando productos en tiempo real...');
+      window.location.reload();
+    });
+
+    // Cuando el carrito cambia en tiempo real
+    socket.on('cart-changed', (data) => {
+      console.log('Carrito actualizado:', data);
+    });
+
+    // Función para agregar productos al carrito dinámicamente
+    async function addToCart(productId) {
+      try {
+        let cartId = localStorage.getItem('cartId');
+        
+        if (!cartId) {
+          const resCart = await fetch('/api/carts', { method: 'POST' });
+          const dataCart = await resCart.json();
+          const payload = dataCart.payload || dataCart;
+          cartId = payload._id || payload.id;
+
+          if (!cartId) {
+            alert('No se pudo generar un carrito nuevo.');
+            return;
+          }
+
+          localStorage.setItem('cartId', cartId);
+        }
+
+        const res = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+          method: 'POST'
+        });
+
+        if (res.ok) {
+          alert('¡Producto agregado al carrito con éxito!');
+        } else {
+          alert('Hubo un problema al agregar el producto.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error conectando con el servidor.');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!-- Navbar de la aplicación -->
+<nav class="navbar navbar-expand-lg bg-white shadow-sm mb-4">
+  <div class="container">
+    <!-- Logo y Nombre de la Tienda -->
+    <a class="navbar-brand d-flex align-items-center fw-bold" href="/products">
+      <img src="/Logo-Santi.jpeg" class="img-thumbnail me-2" alt="Logo" width="50" height="50" style="object-fit: cover;">
+      <span>Mi Tienda</span>
+    </a>
+
+    <!-- Botón Hamburguesa para pantallas móviles -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Contenido colapsable -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+        <li class="nav-item">
+          <a class="nav-link active" href="/products">Catálogo</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/realtimeproducts">Tiempo Real</a>
+        </li>
+        <!-- 🟢 AGREGADO AQUÍ: Botón del Carrito -->
+        <li class="nav-item">
+          <a class="nav-link fw-bold text-primary" href="#" onclick="goToCart(event)">🛒 Ver Carrito</a>
+        </li>
+      </ul>
+
+      <!-- Buscador por query -->
+      <form class="d-flex" action="/products" method="GET" role="search">
+        <input class="form-control me-2" name="query" type="search" placeholder="Buscar producto o categoría..." aria-label="Search" />
+        <button class="btn btn-outline-success" type="submit">Buscar</button>
+      </form>
+    </div>
+  </div>
+</nav>
+
+<!-- 🟢 AGREGADO AQUÍ: Script para redirigir al carrito según el ID guardado -->
+<script>
+  function goToCart(event) {
+    event.preventDefault();
+    const cartId = localStorage.getItem('cartId');
+    if (cartId) {
+      window.location.href = `/cart-view/${cartId}`;
+    } else {
+      alert('Aún no has agregado productos al carrito.');
+    }
+  }
+</script>

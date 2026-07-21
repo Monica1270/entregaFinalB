@@ -1,4 +1,4 @@
-const express = require('express');
+/* const express = require('express');
 const path = require('path');
 const { connectDB } = require('./src/config/db.config');
 
@@ -26,4 +26,4 @@ const startServer = async () => {
   });
 };
 
-startServer();
+startServer(); */
