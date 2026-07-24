@@ -1,4 +1,4 @@
-import { Cart } from "../models/cart.models.js";
+import { Cart} from "../models/cart.models.js";
 import { Product } from "../models/Product.models.js";
 import { io } from "../../api.js";
 
@@ -16,7 +16,7 @@ export const createCart = async (req, res, next) => {
 export const getCartById = async (req, res, next) => {
   try {
     const cart = await Cart.findById(req.params.cid)
-      .populate({ path: 'products.product', model: Product })
+      .populate( 'products.product')
       .lean();
 
     if (!cart) {

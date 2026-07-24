@@ -1,0 +1,200 @@
+# Entrega Final - API E-commerce & Sistema de Gestión 🛒🚀
+## Descripción del Proyecto
+**Mi Tienda API** es un sistema de gestión backend centralizado y escalable
+desarrollado para la administración de un catálogo de productos y carritos de
+compras interactivos. El proyecto ofrece una arquitectura modular robusta,
+sincronización de datos en tiempo real mediante WebSockets, persistencia en MongoDB
+Atlas y renderizado dinámico de vistas mediante el motor de plantillas Handlebars.
+---
+## Datos del Proyecto
+* **Estudiante:** MONICA LOMBARDI
+* **Curso/Materia:** Programación Backend I
+* **Comisión / Fecha:** 2026
+* **Repositorio GitHub:** [https://github.com/tu-usuario/entregaFinalB](https://
+github.com/tu-usuario/entregaFinalB)
+---
+## Público Objetivo y Problema que Resuelve
+* **Problema:** Necesidad de contar con una plataforma ágil, segura y sincronizada
+para gestionar inventarios dinámicos y compras en línea sin inconsistencias de
+stock.
+* **Público Objetivo:**
+* **Clientes finales:** Navegación fluidas por el catálogo, filtrado de productos
+y agregar items al carrito de compras.
+* **Administradores:** Control integral del catálogo (altas, bajas y
+modificaciones en tiempo real).
+---
+## Funcionalidades Clave
+1. **CRUD Completo:** API RESTful para la gestión de Productos (`/api/products`) y
+Carritos (`/api/carts`).
+2. **Paginación & Filtros Dinámicos:** Implementación de `mongoose-paginate-v2`
+para manejar paginación, filtros por categoría o estado, y ordenamiento por precio.
+3. **Poblado Dinámico (Populate):** Vinculación relacional entre productos y
+carritos mediante referencias `ObjectId`.
+4. **Tiempo Real (WebSockets):** Sincronización instantánea de acciones con
+`Socket.io`.
+5. **Vistas Server-Side:** Renderizado con motor Handlebars optimizado mediante
+
+`.lean()`.
+---
+## Arquitectura y Estructura del Proyecto
+```text
+entregaFinalB/
+├── public/ # Archivos estáticos (imágenes, CSS cliente)
+│ ├── Logo-Santi.jpeg
+│ └── whatsapp.png
+├── src/
+│ └── view/ # Plantillas y Layouts Handlebars
+│ ├── layout/
+│ │ └── main.handlebars
+│ └── home.handlebars
+├── api.js # Punto de entrada principal (Express, MongoDB,
+Sockets)
+├── index.html # Vista estática de aterrizaje / presentación
+├── .env # Variables de entorno (no subir a git)
+└── package.json # Dependencias del proyecto
+```
+### Explicación Técnica
+* **ES Modules (`import/export`):** Código moderno y modular.
+* **Desacoplamiento Vistas/API:** Separación clara entre rutas de API REST (JSON) y
+rutas de renderizado HTML.
+* **Middlewares de Transmisión:** Emisión automática de eventos Socket.io al
+detectar cambios en BD.
+---
+## Servidor Express y Conexión a Base de Datos
+* **Puerto:** `8080` (configurado mediante variables de entorno).
+* **Base de Datos:** MongoDB Atlas a través del ODM `Mongoose`.
+* **Middlewares Implementados:**
+* `express.json()`
+* `express.urlencoded({ extended: true })`
+* `express.static('public')`
+* **Seguridad:** Manejo seguro de credenciales con `dotenv`.
+---
+## Endpoints de la API
+### Productos (`/api/products`)
+* `GET /api/products`: Devuelve listado de productos paginado con soporte para
+`limit`, `page`, `sort` y `query`.
+* `GET /api/products/:pid`: Retorna el detalle de un producto específico por su ID
+de Mongoose.
+* `POST /api/products`: Crea un nuevo producto.
+* `PUT /api/products/:pid`: Actualiza las propiedades de un producto existente.
+* `DELETE /api/products/:pid`: Elimina físicamente un producto.
+**Estructura de Respuesta Estandarizada:**
+```json
+{
+"status": "success",
+
+"payload": [...],
+"totalPages": 1,
+"prevPage": null,
+"nextPage": null,
+"page": 1,
+"hasPrevPage": false,
+"hasNextPage": false,
+"prevLink": null,
+"nextLink": null
+}
+```
+### Carritos (`/api/carts`)
+* `POST /api/carts`: Genera un nuevo carrito vacío.
+* `GET /api/carts/:cid`: Muestra los productos del carrito especificado aplicando
+`.populate('products.product')`.
+* `POST /api/carts/:cid/products/:pid`: Agrega o incrementa la cantidad
+(`quantity`) de un producto en el carrito.
+* `DELETE /api/carts/:cid/products/:pid`: Elimina un producto específico del
+carrito.
+* `PUT /api/carts/:cid`: Reemplaza el arreglo entero de productos del carrito.
+* `PUT /api/carts/:cid/products/:pid`: Modifica únicamente la cantidad de un
+producto.
+* `DELETE /api/carts/:cid`: Vacía el carrito por completo.
+## Cómo ejecutar el proyecto (local)
+### 1) Instalar dependencias
+```bash
+pnpm install
+2) Configurar variables de entorno
+Creá un archivo .env en la raíz del proyecto con:
+.env/
+PORT=8080
+NODE_ENV=development
+MONGO_URI=mongodb+srv://monicalombardi1970_db_user:PiRuLo55@cluster0.4hwqowi.mongodb.net/entregaFinalB?retryWrites=true&w=majority&authSource=admin
+
+3) Probar la API
+Health check:
+GET http://localhost:8080/health
+Productos:
+GET http://localhost:8080/api/products
+Carritos:
+GET http://localhost:8080/api/carts/:cid
+Ejemplos de uso de la API
+Productos (/api/products)
+Listar productos paginado
+
+Request:
+GET /api/products?page=1&limit=10&sort=price&query=camisa
+Crear producto
+
+Request:
+POST /api/products
+Body:
+json
+
+{
+  "title": "Camisa",
+  "description": "Camisa de algodón",
+  "price": 2500,
+  "category": "Ropa",
+  "thumbnails": ["https://example.com/camisa.png"]
+}
+Carritos (/api/carts)
+Crear carrito
+
+Request:
+POST /api/carts
+Agregar producto al carrito
+
+Request:
+POST /api/carts/:cid/products/:pid
+Body:
+json
+{ "quantity": 1 }
+Ver carrito (con populate)
+
+Request:
+GET /api/carts/:cid
+
+---
+## Vistas con Handlebars y Estilos
+* **Layout Base (`main.handlebars`):** Integración con **Bootstrap CSS/JS**, barra
+de navegación con marca (`Logo-Santi.jpeg`), botón flotante de atención vía
+WhatsApp y contenedor flexible `{{{body}}}`.
+* **Catálogo (`home.handlebars`):** Iteración mediante `{{#each products}}`
+renderizando tarjetas interactivas con imágenes (`thumbnails`), precios y acción
+directa de compra.
+* **Compatibilidad Mongoose:** Integración de `.lean()` en consultas para asegurar
+compatibilidad estricta con Handlebars.
+---
+## Sincronización en Tiempo Real (WebSockets)
+Uso de la librería **`socket.io`** para la comunicación bidireccional entre cliente
+y servidor.
+* **`products-changed`:** Notifica altas, bajas y modificaciones de productos
+(`emitProductsUpdate()`).
+* **`cart-changed`:** Notifica actualizaciones directas dentro de los carritos
+(`emitCartUpdate()`).
+---
+## Dificultades Encontradas y Soluciones
+1. **Sanitización de documentos de Mongoose en Handlebars:**
+* *Desafío:* Handlebars bloqueaba el acceso directo a las propiedades del
+documento retornado por Mongoose por restricciones de seguridad.
+* *Solución:* Aplicación de la función `.lean()` en las consultas del ODM para
+transformar los documentos en objetos JS planos.
+2. **Manipulación de referencias `ObjectId` en el Array de Carritos:**
+* *Desafío:* Inconsistencia al buscar e incrementar productos dentro del array
+
+encadenado.
+* *Solución:* Normalización de comparaciones usando `.equals()` de Mongoose o
+conversión explícita a String.
+---
+## Mejoras Futuras
+* Implementación de un sistema completo de **Autenticación y Autorización** con
+Passport.js / JWT.
+* Integración de roles (Usuario / Administrador / Premium).
+* Módulo de Checkout

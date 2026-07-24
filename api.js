@@ -1,27 +1,4 @@
-/* import express from 'express';
-import router from './src/routs/product.routs.js';
-import { errorHandler } from './src/middleware/error.middleware.js'; 
 
-const app = express();
-
-// Middlewares globales obligatorios para interpretar los cuerpos de las peticiones
-app.use(express.json());//Parsea Json entrante(req.body)
-app.use(express.urlencoded({ extended: true }));//Parsea formularios urlencoded
-
-// Rutas de nuestra API
-app.use('/api/products', router);
-app.use('/api/carts', cartRouter);
-
-// Endpoint simple de verificación de estado (Health Check)
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    service: 'Mongoose CRUD Store API',
-  });
-});
-app.use(errorHandler);
-export { app }; */
 import express from 'express';
 import { engine } from 'express-handlebars';
 import path from 'path';
@@ -31,9 +8,8 @@ import mongoose from 'mongoose';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
 
-import router from './src/routs/product.routs.js';
-import cartRouter from './src/routs/carts.routs.js';
-
+import productrouter from './src/routs/product.routs.js';
+import cartRouter from './src/routs/carts.routs.js'
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,10 +19,6 @@ const app = express();
 const server = http.createServer(app);
 export const io = new Server(server);
 
-/* mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/tu_base_datos')
-  .then(() => console.log('Conectado a MongoDB'))
-  .catch(err => console.error('Error de conexión:', err));
-   */
 app.engine('handlebars', engine({
   defaultLayout: 'main',
   layoutsDir: path.join(__dirname, 'src/view/layout'),
@@ -64,7 +36,8 @@ app.set('views', path.join(__dirname, 'src/view'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use("/api/products", productrouter);
+app.use("/api/carts", cartRouter);
 
 
 
@@ -89,7 +62,7 @@ productSchema.set('toJSON', {
 });
 
 const Product = mongoose.model('Products', productSchema, 'products')
-
+/* 
 const cartItemSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
@@ -118,7 +91,9 @@ cartSchema.set('toJSON', {
   }
 });
 
-const Cart = mongoose.model('Cart', cartSchema, 'carts');
+const Cart = mongoose.model('Cart', cartSchema, 'carts'); */
+import { Cart } from "./src/models/cart.models.js";
+
 
 // ===================== SOCKETS =====================
 io.on('connection', (socket) => {
@@ -133,37 +108,20 @@ const emitCartUpdate = (cid) => {
   io.emit('cart-changed', { cid, timestamp: new Date().toISOString() });
 };
 
-// ===================== RUTAS =====================
-/* app.get('/', (req, res) => {
-  res.redirect('/products'); // O '/products-view', dependiendo de cómo llamaste a tu ruta de vistas 
-});*/
-// Definimos la ruta /home
-/* app.get('/home', async (req, res, next) => {
-  try {
-    const products = await Product.find().lean();
-    res.render('home', { title: 'Mi Tienda', products });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Redirigimos la raíz '/' hacia '/home'
-app.get('/', (req, res) => {
-  res.redirect('/home');
-});
-
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    service: 'Mongoose CRUD Store API'
-  });
-});
 // ===================== RUTA DE VISTA PARA HANDLEBARS =====================
-app.get('/products-view', async (req, res, next) => {
+app.get('/products', async (req, res, next) => {
   try {
-    // Importante usar .lean() para que Handlebars pueda leer los datos sin restricciones
-    const products = await Product.find().lean();
+const query = req.query.query ? String(req.query.query).trim() : '';
+    let filter = {};
+
+    if (query) {
+      filter.$or = [
+        { category: new RegExp(query, 'i') },
+        { title: new RegExp(query, 'i') }
+      ];
+    }
+ //Importante usar .lean() para que Handlebars pueda leer los datos sin restricciones
+    const products = await Product.find(filter).lean();
     
     // Renderiza tu archivo src/view/home.handlebars
     res.render('home', { 
@@ -174,11 +132,30 @@ app.get('/products-view', async (req, res, next) => {
     next(error);
   }
 });
+ 
+/*app.get('/products', async (req, res, next) => {
+  try {
+    const { cid } = req.params;
+    
+    // Si envían ":cid" o un ID roto, devolvemos el carrito vacío sin romper la app
+    if (!mongoose.Types.ObjectId.isValid(cid)) {
+      return res.render('cart', { title: 'Mi Carrito', cart: { products: [] } });
+    }
 
+    const cart = await Cart.findById(cid).populate('products.product').lean();
 
- */
+    if (!cart) {
+      return res.render('cart', { title: 'Mi Carrito', cart: { products: [] } });
+    }
+
+    res.render('cart', { title: 'Mi Carrito', cart });
+  } catch (error) {
+    next(error);
+  }
+});*/
+
 // Ruta principal de productos (soporta búsqueda por categoría y título)
-app.get('/products', async (req, res, next) => {
+/* app.get('/products', async (req, res, next) => {
   try {
     const query = req.query.query ? String(req.query.query).trim() : '';
     let filter = {};
@@ -189,13 +166,13 @@ app.get('/products', async (req, res, next) => {
         { title: new RegExp(query, 'i') }
       ];
     }
-
+ 
     const products = await Product.find(filter).lean();
     res.render('home', { title: 'Mi Tienda - Catálogo', products });
   } catch (error) {
     next(error);
   }
-});
+});*/
 
 // Alias /home por si alguien entra a /home
 app.get('/home', (req, res) => {
@@ -237,13 +214,6 @@ app.get('/cart-view/:cid', async (req, res, next) => {
     next(error);
   }
 });
-
-
-
-
-
-
-
 
 // ================Productos==============
 app.get('/api/products', async (req, res, next) => {
@@ -364,10 +334,16 @@ app.post('/api/carts', async (req, res, next) => {
     next(error);
   }
 });
-
+//obtener carrito por ID
 app.get('/api/carts/:cid', async (req, res, next) => {
   try {
-    const cart = await Cart.findById(req.params.cid).populate('products.product');
+    const { cid } = req.params;
+     console.log("GET /api/carts/:cid -> cid:", cid);
+
+    if (!mongoose.Types.ObjectId.isValid(cid)) {
+      return res.status(400).json({ status: 'error', message: 'ID de carrito no válido' });
+    }
+    const cart = await Cart.findById(/* req.params. */cid).populate('products.product');
     if (!cart) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
     }
@@ -376,11 +352,13 @@ app.get('/api/carts/:cid', async (req, res, next) => {
     next(error);
   }
 });
-
+//Agregar producto al carrito
 app.post('/api/carts/:cid/products/:pid', async (req, res, next) => {
   try {
     const { cid, pid } = req.params;
-
+if (!mongoose.Types.ObjectId.isValid(cid) || !mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({ status: 'error', message: 'ID de carrito o producto no válido' });
+    }
     const cart = await Cart.findById(cid);
     if (!cart) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
@@ -409,10 +387,14 @@ app.post('/api/carts/:cid/products/:pid', async (req, res, next) => {
     next(error);
   }
 });
-
+//Eliminar producto del carrito
 app.delete('/api/carts/:cid/products/:pid', async (req, res, next) => {
   try {
     const { cid, pid } = req.params;
+if (!mongoose.Types.ObjectId.isValid(cid) || !mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({ status: 'error', message: 'ID de carrito o producto no válido' });
+    }
+
     const cart = await Cart.findById(cid);
 
     if (!cart) {
@@ -428,10 +410,13 @@ app.delete('/api/carts/:cid/products/:pid', async (req, res, next) => {
     next(error);
   }
 });
-
+//Actualizar todos los productos
 app.put('/api/carts/:cid', async (req, res, next) => {
   try {
     const { cid } = req.params;
+if (!mongoose.Types.ObjectId.isValid(cid)) {
+      return res.status(400).json({ status: 'error', message: 'ID de carrito no válido' });
+    }
     const cart = await Cart.findByIdAndUpdate(cid, { products: req.body.products || [] }, { new: true });
     if (!cart) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
@@ -443,16 +428,21 @@ app.put('/api/carts/:cid', async (req, res, next) => {
     next(error);
   }
 });
-
+//Actualizar cantidad de un producto en el carrito
 app.put('/api/carts/:cid/products/:pid', async (req, res, next) => {
   try {
     const { cid, pid } = req.params;
     const { quantity } = req.body;
 
+if (!mongoose.Types.ObjectId.isValid(cid) || !mongoose.Types.ObjectId.isValid(pid)) {
+      return res.status(400).json({ status: 'error', message: 'ID de carrito o producto no válido' });
+    }
+
     const cart = await Cart.findById(cid);
     if (!cart) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
     }
+
 
     const item = cart.products.find(item => item.product.toString() === pid);
     if (!item) {
@@ -468,15 +458,21 @@ app.put('/api/carts/:cid/products/:pid', async (req, res, next) => {
     next(error);
   }
 });
-
+//Vaciar o eliminar carrito
 app.delete('/api/carts/:cid', async (req, res, next) => {
   try {
-    const cart = await Cart.findByIdAndDelete(req.params.cid);
+    const { cid } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(cid)) {
+      return res.status(400).json({ status: 'error', message: 'ID de carrito no válido' });
+    }
+
+    const cart = await Cart.findByIdAndDelete(/* req.params. */cid);
     if (!cart) {
       return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
     }
 
-    emitCartUpdate(req.params.cid);
+    emitCartUpdate(/* req.params. */cid);
     res.json({ status: 'success', message: 'Carrito vaciado' });
   } catch (error) {
     next(error);

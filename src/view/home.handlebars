@@ -28,3 +28,31 @@
         </div>
     {{/each}}
 </div>
+<!-- 🟢 Código JavaScript del cliente -->
+<script>
+async function addToCart(productId) {
+  // Asegúrate de poner aquí tu ID de carrito real guardado en localStorage o en una variable global
+  let cartId = localStorage.getItem('cartId') || '6a615938eb...'; // Reemplaza con tu cartId real
+
+  try {
+    // ⚠️ La URL debe ir SIN los dos puntos ":" antes del productId
+    const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert('¡Producto agregado al carrito con éxito!');
+      console.log('Carrito actualizado:', data);
+    } else {
+      alert('Error: ' + data.message);
+    }
+  } catch (error) {
+    console.error('Error al agregar al carrito:', error);
+  }
+}
+</script>
